@@ -1,0 +1,17 @@
+#pragma once
+
+#include <msgpack.hpp>
+
+enum class rpc_call_name {
+% for function in functions:
+${function['name']},
+% endfor
+};
+
+namespace messages {
+using header = msgpack::type::tuple<int, size_t>;
+% for function in functions:
+using ${function['name']} = msgpack::type::tuple<
+        ${', '.join(param['raw_type'] for param in function['parameters'])}>;
+% endfor
+}

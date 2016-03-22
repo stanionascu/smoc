@@ -1,0 +1,43 @@
+#pragma once
+
+#include "rpc-common.hpp"
+#include "rpc-base.h"
+#include <msgpack.hpp>
+
+struct rpc_handler {
+% for function in functions:
+${function['rtnType']} (*${function['name']}_cb)(${', '.join(param['type'] for param in function['parameters'])}) = nullptr;
+% endfor
+
+inline void process(rpc_call_name call_name, const msgpack::object &msg)
+{
+  switch(call_name) {
+% for function in functions:
+  case rpc_call_name::${function['name']}: {
+    if (${function['name']}_cb) {
+      messages::${function['name']} params;
+      msg.convert(params);
+      % if function['rtnType'] != 'void':
+      ${function['rtnType']} result =
+      % endif
+      (*${function['name']}_cb)(
+        ${', '.join("params.get<" + str(i) + ">()" for i, x in enumerate(function['parameters']))}
+      );
+      % if function['rtnType'] != 'void':
+      msgpack::sbuffer repbuf;
+      msgpack::pack(repbuf, result);
+
+      zmq_msg_t repmsg;
+      zmq_msg_init_size(&repmsg, repbuf.size());
+      memcpy(zmq_msg_data(&repmsg), repbuf.data(), repbuf.size());
+      zmq_sendmsg(rpc_socket, &repmsg, 0);
+      zmq_msg_close(&repmsg);
+      % endif
+    }
+  } break;
+% endfor
+  default:
+    break;
+  };
+}
+};
