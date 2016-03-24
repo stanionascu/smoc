@@ -19,10 +19,10 @@ if(LIBZMQ_FOUND AND LIBMSGPACK_FOUND)
     rpc-common.hpp)
 
   smoc_generate(${CMAKE_CURRENT_SOURCE_DIR}/rpc/rpc-base.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rpc/rpc-server.hpp.tmpl
-    rpc-server.hpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/rpc/rpc-server.cpp.tmpl
+    rpc-server.cpp)
   add_executable(rpc-server rpc/main-server.cpp
-    rpc-server.hpp rpc-common.hpp)
+    rpc-server.cpp rpc-common.hpp)
   target_link_libraries(rpc-server rpc-lib)
 
   smoc_generate(${CMAKE_CURRENT_SOURCE_DIR}/rpc/rpc-base.h

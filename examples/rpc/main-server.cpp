@@ -4,14 +4,16 @@
 #include <zmq.h>
 
 #include "rpc-server.hpp"
+#include "rpc-base.h"
+#include "rpc-pack.hpp"
 
 void *rpc_socket = nullptr;
 
-void local_say_ho(const std::string &what) {
+void rpc_say(const std::string &what) {
   std::cout << "SERVER must say: " << what << std::endl;
 }
 
-int local_add(int x, int y) {
+int rpc_add(int x, int y) {
   std::cout << "SERVER must add: " << x << " + " << y << std::endl;
   return x + y;
 }
@@ -26,10 +28,6 @@ int main(int argc, char **argv) {
   if (rc == 0) {
     std::cout << "Listening on: 127.0.0.1:9999" << std::endl;
   }
-
-  rpc_handler handlr;
-  handlr.rpc_say_cb = &local_say_ho;
-  handlr.rpc_add_cb = &local_add;
 
   while (true) {
     zmq_msg_t header_zmsg;
@@ -53,8 +51,8 @@ int main(int argc, char **argv) {
                     static_cast<char *>(zmq_msg_data(&body_zmsg)),
                     zmq_msg_size(&body_zmsg));
 
-    handlr.process(static_cast<rpc_call_name>(header.get<0>()),
-                   body_unpacked.get());
+    execute_rpc_request(static_cast<rpc_call_name>(header.get<0>()),
+                        body_unpacked.get());
 
     zmq_msg_close(&header_zmsg);
     zmq_msg_close(&body_zmsg);

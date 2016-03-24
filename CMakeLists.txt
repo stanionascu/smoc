@@ -6,7 +6,7 @@ option(smoc_BUILD_EXAMPLES "Build smoc examples" ON)
 
 find_package(PythonInterp)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 if(NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")

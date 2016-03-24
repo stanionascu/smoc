@@ -1,44 +1,18 @@
 #include "${source_include}"
 
 #include "rpc-common.hpp"
-
-#include <zmq.h>
-#include <msgpack.hpp>
+#include "rpc-pack.hpp"
 
 % for function in functions:
-${function['rtnType']} ${function['name']}(${', '.join(param['type'] + ' ' + param['name'] for param in function['parameters'])}) {
-  msgpack::sbuffer bodybuf;
-  msgpack::pack(bodybuf, messages::${function['name']}(
-    ${', '.join(param['name'] for param in function['parameters'])}));
-
-  msgpack::sbuffer headbuf;
-  msgpack::pack(headbuf, messages::header(
-       static_cast<int>(rpc_call_name::${function['name']}),
-       bodybuf.size()));
-
-  zmq_msg_t head;
-  zmq_msg_init_size(&head, headbuf.size());
-  memcpy(zmq_msg_data(&head), headbuf.data(), headbuf.size());
-  zmq_sendmsg(rpc_socket, &head, ZMQ_SNDMORE);
-
-  zmq_msg_t body;
-  zmq_msg_init_size(&body, bodybuf.size());
-  memcpy(zmq_msg_data(&body), bodybuf.data(), bodybuf.size());
-  zmq_sendmsg(rpc_socket, &body, 0);
-
-  zmq_msg_close(&head);
-  zmq_msg_close(&body);
+${function['rtnType']}
+  ${function['name']}(
+  ${', '.join(param['type'] + ' ' + param['name']
+              for param in function['parameters'])}) {
+  send_rpc_message(rpc_socket,
+               static_cast<int>(rpc_call_name::${function['name']}),
+               ${', '.join(param['name'] for param in function['parameters'])});
   % if function['rtnType'] != 'void':
-  zmq_msg_t reply;
-  zmq_msg_init(&reply);
-  zmq_recvmsg(rpc_socket, &reply, 0);
-  msgpack::unpacked reply_unpacked;
-  msgpack::unpack(reply_unpacked,
-    static_cast<char*>(zmq_msg_data(&reply)), zmq_msg_size(&reply));
-  ${function['rtnType']} reply_data;
-  reply_unpacked.get().convert(reply_data);
-  zmq_msg_close(&reply);
-  return reply_data;
+  return get_reply<${function['rtnType']}>(rpc_socket);
   % endif
 }
 

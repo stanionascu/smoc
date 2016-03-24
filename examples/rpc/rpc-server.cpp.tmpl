@@ -1,0 +1,26 @@
+#include "rpc-common.hpp"
+#include "rpc-base.h"
+
+#include "rpc-pack.hpp"
+
+void execute_rpc_request(rpc_call_name call_name, const msgpack::object &msg)
+{
+  switch(call_name) {
+% for function in functions:
+  case rpc_call_name::${function['name']}: {
+      auto params = std::move(unpack_message(${function['name']}, msg));
+      % if function['rtnType'] != 'void':
+      const auto &result =
+      % endif
+      ${function['name']}(
+        ${', '.join("params.get<" + str(i) + ">()" for i, x in enumerate(function['parameters']))}
+      );
+      % if function ['rtnType'] != 'void':
+      send_message(rpc_socket, 0, result);
+      % endif
+  } break;
+% endfor
+  default:
+    break;
+  };
+}
