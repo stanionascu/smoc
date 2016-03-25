@@ -26,3 +26,7 @@
 *.exe
 *.out
 *.app
+
+# emacs
+.dir-locals.el
+.projectile
