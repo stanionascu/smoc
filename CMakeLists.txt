@@ -12,6 +12,8 @@ if(NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
 endif()
 
+add_subdirectory(src)
+
 function(smoc_generate FILENAME TEMPLATE OUTPUT)
   get_filename_component(NAME ${FILENAME} NAME_WE)
   add_custom_command(
@@ -25,7 +27,7 @@ function(smoc_generate FILENAME TEMPLATE OUTPUT)
     PROPERTIES GENERATED TRUE)
 endfunction()
 
-#examples
+# examples
 if(smoc_BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()

@@ -32,3 +32,6 @@ if(LIBZMQ_FOUND AND LIBMSGPACK_FOUND)
     rpc-client.cpp rpc-common.hpp)
   target_link_libraries(rpc-client rpc-lib)
 endif()
+
+add_executable(classinfo classinfo/main.cpp)
+target_link_libraries(classinfo smoc)
