@@ -2,6 +2,8 @@
 
 namespace smoc {
 
+object_info<object> object::info_;
+
 object::object() {
 }
 
@@ -9,8 +11,7 @@ object::~object() {
 }
 
 const object_info<object> &object::static_info() {
-  static object_info<object> info;
-  return info;
+  return info_;
 }
 
 }
