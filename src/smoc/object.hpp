@@ -8,6 +8,7 @@
 #include <boost/type_index.hpp>
 
 #include "property.hpp"
+#include "method.hpp"
 #include "detail/object_macros.hpp"
 
 #define SMOC_OBJECT(CLASS_NAME)                                                \
@@ -19,11 +20,12 @@ public:                                                                        \
     return CLASS_NAME::static_info();                                          \
   }
 
-#define SMOC_DESCRIBE(CLASS_NAME, PROPERTIES)                                  \
+#define SMOC_DESCRIBE(CLASS_NAME, PROPERTIES, METHODS)                         \
   namespace smoc {                                                             \
   template <> object_info<CLASS_NAME> init_object_info<CLASS_NAME>() {         \
     object_info<my_class> info;                                                \
     info.properties_ = SMOC_PP_SEQ_TO_PROPERTY_MAP(PROPERTIES);                \
+    info.methods_ = SMOC_PP_SEQ_TO_METHOD_MAP(METHODS);                     \
     return info;                                                               \
   }                                                                            \
   }                                                                            \
@@ -38,6 +40,7 @@ struct object_info_base {
   virtual ~object_info_base() {}
   virtual const std::string &class_name() const = 0;
   virtual std::vector<property> properties() const = 0;
+  virtual std::vector<method> methods() const = 0;
 };
 
 template<class T>
@@ -52,7 +55,12 @@ struct object_info : object_info_base {
     return properties_;
   }
 
+  std::vector<method> methods() const override {
+    return methods_;
+  }
+
   std::vector<property> properties_;
+  std::vector<method> methods_;
 };
 
 class object {
