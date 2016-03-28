@@ -1,60 +1,48 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <cassert>
 
 #include <boost/type_index.hpp>
-
-#include "detail/property_data.hpp"
+#include <boost/any.hpp>
 
 namespace smoc {
 
-template<class Type>
-struct property;
+struct property {
+  template <class T, class C>
+  property(const std::string &name, T(C::*v))
+      : name_(name), value_(v) {}
+  virtual ~property() {}
 
-struct property_base {
-  virtual const boost::typeindex::type_index &type_id() const = 0;
-  template <class Type> property<Type> &as() {
-    return static_cast<property<Type> &>(*this);
-  }
-  template <class Type> const property<Type> &as() const {
-    return static_cast<const property<Type> &>(*this);
-  }
-};
+  const std::string &name() const { return name_; }
+  boost::any &value() { return value_; }
+  const boost::any &value() const { return value_; }
 
-template<class Type>
-struct property : property_base {
-  // class attribute property
-  template<class C>
-  property(Type (C::*ptr), C *obj = nullptr) :
-      d_(std::make_unique<detail::property_attribute_data<Type, C>>(ptr, obj))
-  {
+  const auto &type() const { return value_.type(); }
+
+  template<class T, class C>
+  bool is_type_of() const {
+    return (boost::any_cast<T(C::*)>(&value_));
   }
 
-  const boost::typeindex::type_index &type_id() const override {
-    static const auto &id =
-        boost::typeindex::type_id<Type>();
-    return id;
+  template<class T, class C>
+  const T &read(const C *obj) const {
+    const auto &v = boost::any_cast<T(C::*)>(&value_);
+    assert(v);
+    return (*obj).**v;
   }
 
-  operator Type() { return d_->get(); }
-  const Type &operator()() { return d_->get(); }
-  auto &operator=(const Type &v) { d_->set(v); return *this; }
-
-  template<class C>
-  const Type &read(const C *obj) const {
-    return static_cast<const detail::property_attribute_data<Type, C> *>(
-               d_.get())
-        ->read(obj);
-  }
-
-  template<class C>
-  void write(C *obj, const Type &v) {
-    static_cast<detail::property_attribute_data<Type, C> *>(d_.get())->write(
-        obj, v);
+  template<class T, class C>
+  void write(C *obj, const T &val) {
+    auto v = boost::any_cast<T(C::*)>(&value_);
+    assert(v);
+    (*obj).**v = val;
   }
 
 private:
-  std::unique_ptr<detail::property_data<Type>> d_;
+  std::string name_;
+  boost::any value_;
 };
 
 } // smoc

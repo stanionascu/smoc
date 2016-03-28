@@ -6,12 +6,13 @@
 #include <map>
 
 #include <boost/type_index.hpp>
-#include <boost/preprocessor/seq/for_each.hpp>
 
 #include "property.hpp"
 #include "detail/object_macros.hpp"
 
 #define SMOC_OBJECT(CLASS_NAME)                                                \
+  friend smoc::object_info<CLASS_NAME> smoc::init_object_info<CLASS_NAME>();   \
+                                                                               \
 public:                                                                        \
   static const smoc::object_info<CLASS_NAME> &static_info();                   \
   const smoc::object_info_base &info() const override {                        \
@@ -22,7 +23,7 @@ public:                                                                        \
   namespace smoc {                                                             \
   template <> object_info<CLASS_NAME> init_object_info<CLASS_NAME>() {         \
     object_info<my_class> info;                                                \
-    info.properties_ = SMOC_PP_SEQ_TO_MAP(PROPERTIES);                         \
+    info.properties_ = SMOC_PP_SEQ_TO_PROPERTY_MAP(PROPERTIES);                \
     return info;                                                               \
   }                                                                            \
   }                                                                            \
@@ -34,8 +35,9 @@ public:                                                                        \
 namespace smoc {
 
 struct object_info_base {
+  virtual ~object_info_base() {}
   virtual const std::string &class_name() const = 0;
-  virtual std::map<std::string, property_base &> properties() const = 0;
+  virtual std::vector<property> properties() const = 0;
 };
 
 template<class T>
@@ -46,11 +48,11 @@ struct object_info : object_info_base {
     return name;
   }
 
-  std::map<std::string, property_base &> properties() const override {
+  std::vector<property> properties() const override {
     return properties_;
   }
 
-  std::map<std::string, property_base&> properties_;
+  std::vector<property> properties_;
 };
 
 class object {
@@ -63,8 +65,6 @@ public:
 
 private:
   static object_info<object> info_;
-
-  std::map<std::string, property_base&> properties_;
 };
 
 template<class T>

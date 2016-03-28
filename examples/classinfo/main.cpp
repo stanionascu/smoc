@@ -7,18 +7,12 @@ class my_class : public smoc::object {
 public:
   my_class() { }
 
-  static smoc::property<int> foo;
-  static smoc::property<std::string> name;
-
 private:
   std::string name_ = "name_property";
   int foo_ = 34;
 };
 
-smoc::property<int> my_class::foo{&my_class::foo_};
-smoc::property<std::string> my_class::name{&my_class::name_};
-
-SMOC_DESCRIBE(my_class, (("Foo")(my_class::foo))(("Name")(my_class::name)))
+SMOC_DESCRIBE(my_class, (("Foo")(&my_class::foo_))(("Name")(&my_class::name_)))
 
 int main(int argc, char **argv) {
   (void)argc; (void)argv;
@@ -27,13 +21,15 @@ int main(int argc, char **argv) {
   std::cout << "Class name: " << test.info().class_name() << std::endl
             << "Static class name: " << my_class::static_info().class_name()
             << std::endl;
+  std::cout << "Writing 77 into Foo property" << std::endl;
+  my_class::static_info().properties()[0].write<int>(&test, 77);
   std::cout << "List of properties: " << std::endl;
-  for (auto &p : my_class::static_info().properties()) {
-    std::cout << "\t" << p.first << " => ";
-    if (p.second.type_id() == boost::typeindex::type_id<int>())
-      std::cout << p.second.as<int>().read(&test);
-    else if (p.second.type_id() == boost::typeindex::type_id<std::string>())
-      std::cout << p.second.as<std::string>().read(&test);
+  for (const auto &p : my_class::static_info().properties()) {
+    std::cout << "\t" << p.name() << " => ";
+    if (p.is_type_of<std::string, my_class>())
+      std::cout << p.read<std::string>(&test);
+    if (p.is_type_of<int, my_class>())
+      std::cout << p.read<int>(&test);
     std::cout << std::endl;
   }
 
