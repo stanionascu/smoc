@@ -4,6 +4,14 @@ namespace smoc {
 
 object_info<object> object::info_;
 
+template<>
+std::vector<method> object_info<object>::registerMethods{
+};
+
+template<>
+std::vector<property> object_info<object>::registerProperties{
+};
+
 object::object() {
 }
 

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <smoc/object.hpp>
+#include <chrono>
 
 class my_class : public smoc::object {
   SMOC_OBJECT(my_class)
@@ -26,9 +27,17 @@ private:
   std::string last_said_word_;
 };
 
-SMOC_DESCRIBE(my_class, (("Foo")(&my_class::foo_))(("Name")(&my_class::name_)),
-              (("say_hello")(&my_class::say_hello))(("say")(&my_class::say))(
-                  ("is_last_word_said")(&my_class::is_last_word_said)))
+template<>
+std::vector<smoc::method> smoc::object_info<my_class>::registerMethods{
+  { "say_hello", &my_class::say_hello },
+  { "say", &my_class::say },
+  { "is_last_word_said", &my_class::is_last_word_said }
+};
+template <>
+std::vector<smoc::property> smoc::object_info<my_class>::registerProperties{
+  { "foo", &my_class::foo_ },
+  { "name", &my_class::name_ }
+};
 
 int main(int argc, char **argv) {
   (void)argc; (void)argv;
@@ -38,7 +47,8 @@ int main(int argc, char **argv) {
             << "Static class name: " << my_class::static_info().class_name()
             << std::endl;
   std::cout << "Writing 77 into Foo property" << std::endl;
-  my_class::static_info().properties()[0].write<int>(&test, 77);
+  auto foo_prop = my_class::static_info().properties()[0];
+  foo_prop.write<int>(&test, 77);
   std::cout << "List of properties: " << std::endl;
   for (const auto &p : my_class::static_info().properties()) {
     std::cout << "\t" << p.name() << " => ";
@@ -50,7 +60,7 @@ int main(int argc, char **argv) {
   }
 
   std::cout << "List of methods: " << std::endl;
-  for (auto &m : my_class::static_info().methods()) {
+  for (auto m : my_class::static_info().methods()) {
     std::cout << "\t" << m.name() << "(args:" << m.arg_count() << ")" << " => ";
     if (m.is_const())
       std::cout << "(const) => ";
