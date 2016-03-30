@@ -47,8 +47,8 @@ struct object_info : object_info_base {
     return registerMethods;
   }
 
-  static std::vector<property> registerProperties;
-  static std::vector<method> registerMethods;
+  static const std::vector<property> registerProperties;
+  static const std::vector<method> registerMethods;
 };
 
 class object {

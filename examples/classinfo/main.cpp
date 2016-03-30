@@ -27,14 +27,14 @@ private:
   std::string last_said_word_;
 };
 
-template<>
-std::vector<smoc::method> smoc::object_info<my_class>::registerMethods{
+template <>
+const std::vector<smoc::method> smoc::object_info<my_class>::registerMethods{
   { "say_hello", &my_class::say_hello },
   { "say", &my_class::say },
   { "is_last_word_said", &my_class::is_last_word_said }
 };
 template <>
-std::vector<smoc::property> smoc::object_info<my_class>::registerProperties{
+const std::vector<smoc::property> smoc::object_info<my_class>::registerProperties{
   { "foo", &my_class::foo_ },
   { "name", &my_class::name_ }
 };
