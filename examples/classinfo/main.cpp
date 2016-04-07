@@ -21,9 +21,13 @@ public:
     return !last_said_word_.empty();
   }
 
+  const int &get_foo() const { return foo_; }
+  void set_foo(const int &v) { foo_ = v; }
+
 private:
   std::string name_ = "name_property";
   int foo_ = 34;
+  const int const_foo_ = 88;
   std::string last_said_word_;
 };
 
@@ -36,7 +40,9 @@ const std::vector<smoc::method> smoc::object_info<my_class>::registerMethods{
 template <>
 const std::vector<smoc::property> smoc::object_info<my_class>::registerProperties{
   { "foo", &my_class::foo_ },
-  { "name", &my_class::name_ }
+  { "name", &my_class::name_ },
+  { "const_foo", &my_class::const_foo_ },
+  { "foo_setget", &my_class::get_foo, &my_class::set_foo}
 };
 
 int main(int argc, char **argv) {
@@ -47,14 +53,20 @@ int main(int argc, char **argv) {
             << "Static class name: " << my_class::static_info().class_name()
             << std::endl;
   std::cout << "Writing 77 into Foo property" << std::endl;
-  auto foo_prop = my_class::static_info().properties()[0];
-  foo_prop.write<int>(&test, 77);
+  {
+    auto foo_prop = my_class::static_info().properties()[0];
+    foo_prop.write<int>(&test, 77);
+  }
+  {
+    auto foo_prop = my_class::static_info().properties()[3];
+    foo_prop.write<int>(&test, 88);
+  }
   std::cout << "List of properties: " << std::endl;
   for (const auto &p : my_class::static_info().properties()) {
     std::cout << "\t" << p.name() << " => ";
-    if (p.is_type_of<std::string, my_class>())
+    if (p.is_type_of<std::string>())
       std::cout << p.read<std::string>(&test);
-    if (p.is_type_of<int, my_class>())
+    if (p.is_type_of<int>())
       std::cout << p.read<int>(&test);
     std::cout << std::endl;
   }
