@@ -76,11 +76,11 @@ int main(int argc, char **argv) {
     std::cout << "\t" << m.name() << "(args:" << m.arg_count() << ")" << " => ";
     if (m.is_const())
       std::cout << "(const) => ";
-    if (m.is_type_of<void, my_class>())
+    if (m.is_type_of<void>())
       m.invoke<void>(&test);
-    if (m.is_type_of<bool, my_class>())
+    if (m.is_type_of<bool>())
       std::cout << std::boolalpha << m.invoke<bool>(&test);
-    if (m.is_type_of<void, my_class, const std::string &>())
+    if (m.is_type_of<void, std::string>())
       m.invoke<void, const std::string &>(&test, std::string{"hello world!"});
     std::cout << std::endl;
   }
