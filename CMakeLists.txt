@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.4)
 enable_language(CXX)
 
 option(smoc_BUILD_EXAMPLES "Build smoc examples" ON)
+option(smoc_BUILD_TESTS "Build smoc tests" ON)
 
 find_package(PythonInterp)
 
@@ -30,4 +31,10 @@ endfunction()
 # examples
 if(smoc_BUILD_EXAMPLES)
   add_subdirectory(examples)
+endif()
+
+# tests
+if(smoc_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
 endif()
