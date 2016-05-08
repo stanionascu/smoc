@@ -4,7 +4,8 @@ include_directories(smoc)
 
 add_library(smoc STATIC
   smoc/object.cpp
-  smoc/event_loop.cpp)
+  smoc/event_loop.cpp
+  smoc/application.cpp)
 target_include_directories(smoc SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_include_directories(smoc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(smoc ${Boost_LIBRARIES})
