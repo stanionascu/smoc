@@ -16,7 +16,7 @@ public:
   void post(T t) { loop_.post(t); }
 
 private:
-  class pimpl;
+  struct pimpl;
   std::unique_ptr<pimpl> d_;
   smoc::event_loop loop_;
 };
